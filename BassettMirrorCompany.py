@@ -20,7 +20,7 @@ def process_collection_products(page, collection_link, all_products):
         soup = BeautifulSoup(content, 'html.parser')
         products = soup.find_all("a", class_="col2 span_1_of_3 grid-tn")
         product_links = [
-            "https://www.bassettmirror.com" + item.get('href')
+            "https://www.bassettmirror.com" + item.get('href').replace(" ", "%20")
             for item in products
         ]
 
@@ -126,7 +126,7 @@ class ProductSpider(scrapy.Spider):
         "PHOTO3", "PHOTO4", "PHOTO5", "PHOTO6", "PHOTO7", "PHOTO8", "PHOTO9", "PHOTO10", "INFO1",
         "INFO2", "INFO3", "INFO4", "INFO5", "DESCRIPTION", "PRODUCT_DESCRIPTION",
         "SPECIFICATIONS", "CONSTRUCTION", "COLLECTION_FEATURES", "WARRANTY", "ADDITIONAL_INFORMATION",
-        "DISCLAIMER", "VIEWTYPE", "ITEM_URL"
+        "DISCLAIMER", "VIEWTYPE", "ITEM_URL", "CATALOG_PDF",
     ]
 
     def __init__(self, input_file='utilities/products-links.csv', *args, **kwargs):
@@ -170,6 +170,7 @@ class ProductSpider(scrapy.Spider):
         product_description = ""
         specifications = ""
         specifications_str = ""
+        catalog_pdf = ""
         try:
             meta = response.meta
             soup = BeautifulSoup(response.text, 'html.parser')
@@ -258,6 +259,12 @@ class ProductSpider(scrapy.Spider):
             except AttributeError:
                 description = ""
                
+            try:
+                catalog_pdf = soup.find('a', class_ = "btn-tearsheet")
+                if catalog_pdf:
+                    catalog_pdf = catalog_pdf.get("href")
+            except:
+                catalog_pdf = ""
 
             data.update({
                 "CATEGORY1": category1,
@@ -277,7 +284,8 @@ class ProductSpider(scrapy.Spider):
                 "CONSTRUCTION": "", 
                 "SPECIFICATIONS": specifications_str,
                 "BRAND": "Bassett Mirror",
-                "VIEWTYPE": "Normal",   
+                "VIEWTYPE": "Normal",  
+                "CATALOG_PDF" : catalog_pdf, 
             })
 
             try:
