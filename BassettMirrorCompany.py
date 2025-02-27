@@ -317,7 +317,7 @@ class ProductSpider(scrapy.Spider):
                 if idx > 9:
                     continue
                 else:
-                    data[f"PHOTO{idx + 1}"] = img_url
+                    data[f"PHOTO{idx + 1}"] = str(img_url).replace("'", "")
             if len(products_images) < 10:
                 self.logger.info(f"Only {len(products_images)} images found for {meta['product_link']}. Remaining PHOTO columns will be ''.")
             elif len(products_images) > 10:
